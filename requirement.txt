@@ -1,0 +1,9 @@
+Flask
+Werkzeug
+deepface
+opencv-python
+mtcnn
+python-dotenv
+numpy
+h5py
+scipy

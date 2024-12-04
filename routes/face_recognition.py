@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify, redirect, render_template
 from werkzeug.utils import secure_filename
 import os
 from deepface import DeepFace
-from model.embedding import allowed_file
 import cv2
 from mtcnn import MTCNN
 from dotenv import load_dotenv
@@ -10,6 +9,7 @@ import numpy as np
 import h5py
 import time
 import base64
+from scipy.spatial.distance import cosine
 
 # Load environment variables
 load_dotenv()
@@ -186,6 +186,9 @@ def get_incremental_filename(folder, filename):
         new_file_path = os.path.join(folder, new_filename)
         
     return new_filename
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
 
 @face_recognition_bp.route('/api/upload', methods=['POST'])
 def upload():
