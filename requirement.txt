@@ -7,3 +7,4 @@ python-dotenv
 numpy
 h5py
 scipy
+tqdm
