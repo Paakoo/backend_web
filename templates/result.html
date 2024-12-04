@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2 class="text-center">Hasil Face Recognition</h2>
+<div class="text-center">
+    <img src="{{ url_for('static', filename='uploads/' + result.image) }}" alt="Uploaded Image" class="result-img img-thumbnail">
+</div>
+<div class="text-center">
+    {% if result.name != "Unknown" and result.name != "Error" %}
+        <h3>Identified As: {{ result.name }}</h3>
+        {% if result.distance %}
+            <p>Distance: {{ "%.2f"|format(result.distance) }}</p>
+        {% endif %}
+    {% elif result.name == "Unknown" %}
+        <h3>Identified As: Unknown</h3>
+    {% else %}
+        <h3>Identified As: Error</h3>
+    {% endif %}
+
+    <!-- <h1>Hasil Pengenalan Wajah</h1>
+    <p>Gambar yang Diupload: <strong>{{ result.image }}</strong></p>
+    <p>Identitas: <strong>{{ result.name }}</strong></p>
+    
+    {% if result.cropped_image %}
+        <h2>Wajah yang Ditemukan:</h2>
+        <img src="{{ url_for('static', filename=result.cropped_image) }}" alt="Cropped Face">
+    {% else %}
+        <p>Tidak ada wajah yang ditemukan.</p>
+    {% endif %} -->
+</div>
+<div class="text-center mt-4">
+    <a href="/" class="btn btn-secondary">Kembali</a>
+</div>
+{% endblock %}

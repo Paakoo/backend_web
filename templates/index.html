@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2 class="text-center">Face Recognition App</h2>
+<div class="text-center">
+    <a href="/capture" class="btn btn-danger">Tambah Wajah</a>
+    <br>
+    <br>
+    <a href="/camera" class="btn btn-primary">Ambil Gambar dengan Kamera</a>
+    <form method="POST" action="/upload" enctype="multipart/form-data" class="mt-3">
+        <div class="form-group">
+            <label for="file">Atau pilih gambar wajah:</label>
+            <input type="file" class="form-control-file" id="file" name="file" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-success btn-block">Unggah dan Kenali Wajah</button>
+    </form>
+</div>
+{% endblock %}

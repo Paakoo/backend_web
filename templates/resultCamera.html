@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Result</title>
+    <style>
+        .result-container {
+            width: 50%;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .result-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        .spoof-warning {
+            color: red;
+            font-weight: bold;
+        }
+        .real-message {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <h1>Anti-Spoofing Detection Result</h1>
+
+        <!-- Display the uploaded image -->
+        <img src="{{ url_for('static', filename='uploads/' ~ result['image']) }}" alt="Uploaded Image">
+
+        <h2>Detection Status</h2>
+
+        <!-- Display Spoofing Detection Result -->
+        <p>{{ result['spoofing_message'] }}</p>
+
+        <a href="/">Back to Home</a>
+    </div>
+</body>
+</html>

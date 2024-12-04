@@ -1,0 +1,166 @@
+<!-- templates/capture.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Capture Multiple Angles</title>
+    <style>
+        #loading {
+            display: none;
+            font-size: 18px;
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>Capture Faces from Multiple Angles</h1>
+
+    <label for="username">Enter Name:</label>
+    <input type="text" id="username" name="username">
+    <br><br>
+
+    <label for="cameras">Select Camera:</label>
+    <select id="cameras"></select>
+    <br><br>
+
+    <video id="video" width="640" height="480" autoplay></video>
+    <br>
+
+    <button id="captureFront">Capture Front (10x)</button>
+    <button id="captureLeft">Capture Left (10x)</button>
+    <button id="captureRight">Capture Right (10x)</button>
+
+    <p id="loading">Processing, please wait...</p>
+
+    <script>
+        const video = document.getElementById('video');
+        const captureFront = document.getElementById('captureFront');
+        const captureLeft = document.getElementById('captureLeft');
+        const captureRight = document.getElementById('captureRight');
+        const usernameInput = document.getElementById('username');
+        const camerasSelect = document.getElementById('cameras');
+        const loadingMessage = document.getElementById('loading');
+
+        let currentStream = null;
+
+        // Fungsi untuk menghentikan stream video yang sedang aktif
+        const stopCurrentStream = () => {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+        };
+
+        // Fungsi untuk mengakses kamera
+        const startCamera = (deviceId) => {
+            stopCurrentStream();
+            navigator.mediaDevices.getUserMedia({
+                video: {
+                    deviceId: deviceId ? { exact: deviceId } : undefined
+                }
+            })
+            .then((stream) => {
+                currentStream = stream;
+                video.srcObject = stream;
+            })
+            .catch((err) => {
+                console.error("Error accessing camera: ", err);
+            });
+        };
+
+        // Mendapatkan daftar kamera
+        navigator.mediaDevices.enumerateDevices()
+            .then((devices) => {
+                devices.forEach((device) => {
+                    if (device.kind === 'videoinput') {
+                        const option = document.createElement('option');
+                        option.value = device.deviceId;
+                        option.text = device.label || `Camera ${camerasSelect.length + 1}`;
+                        camerasSelect.appendChild(option);
+                    }
+                });
+                startCamera(camerasSelect.value);
+            })
+            .catch((err) => {
+                console.error("Error enumerating devices: ", err);
+            });
+
+        // Ganti kamera saat pilihan diubah
+        camerasSelect.addEventListener('change', () => {
+            startCamera(camerasSelect.value);
+        });
+
+        // Fungsi untuk menangkap gambar dari video
+        const captureImage = (angle, count) => {
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/jpeg');
+
+            const username = usernameInput.value.trim();
+            if (!username) {
+                alert("Please enter a name.");
+                return;
+            }
+
+            return fetch('/api/save_image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image: dataUrl,
+                    angle: angle,
+                    count: count,
+                    username: username
+                }),
+            });
+        };
+
+        // Fungsi untuk memproses pengambilan gambar dan memperbarui UI
+        const processCapture = async (angle) => {
+            let button;
+            if (angle === 'front') {
+                button = captureFront;
+            } else if (angle === 'left') {
+                button = captureLeft;
+            } else if (angle === 'right') {
+                button = captureRight;
+            }
+
+            loadingMessage.style.display = 'block';
+            button.disabled = true;
+
+            for (let i = 0; i < 10; i++) {
+                await captureImage(angle, i + 1)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Image saved:", data.message);
+                    })
+                    .catch(error => {
+                        console.error("Error saving image:", error);
+                    });
+
+                await new Promise(resolve => setTimeout(resolve, 500)); // 500ms delay
+            }
+
+            button.disabled = false;
+            loadingMessage.style.display = 'none';
+        };
+
+        // Event listeners for capture buttons
+        captureFront.addEventListener('click', () => {
+            processCapture('front');
+        });
+
+        captureLeft.addEventListener('click', () => {
+            processCapture('left');
+        });
+
+        captureRight.addEventListener('click', () => {
+            processCapture('right');
+        });
+    </script>
+</body>
+</html>
